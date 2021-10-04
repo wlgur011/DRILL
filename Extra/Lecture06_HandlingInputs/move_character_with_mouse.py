@@ -32,7 +32,7 @@ while running:
     character.clip_draw(frame * 100, 100 * 1, 100, 100, x, y)
     update_canvas()
     frame = (frame + 1) % 8
-
+    delay(0.05)
     handle_events()
 
 close_canvas()
