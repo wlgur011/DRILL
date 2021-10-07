@@ -13,7 +13,7 @@ def handle_events():
     for event in events:
         if event.type == SDL_MOUSEMOTION:
             destx = event.x
-            desty = KPU_HEIGHT - event.y
+            desty = KPU_HEIGHT - event.y - 1
             if destx > x:
                 viewdir = 1
             else:
