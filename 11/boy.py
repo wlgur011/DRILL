@@ -20,7 +20,17 @@ key_event_table = {
 # Boy States
 class IdleState:
     def enter(boy, event):
-        
+        if (boy.velocity == 2 or boy.velocity == -2):
+            boy.velocity /= 2
+        if event == RIGHT_DOWN:
+            boy.velocity += 1
+        elif event == LEFT_DOWN:
+            boy.velocity -= 1
+        elif event == RIGHT_UP:
+            boy.velocity -= 1
+        elif event == LEFT_UP:
+            boy.velocity += 1
+        boy.timer = 1000
         
         boy.timer = 1000
     def exit(boy, event):
@@ -38,19 +48,17 @@ class IdleState:
 
 class RunState:
     def enter(boy, event):
-        if boy.velocity == 2 or boy.velocity == -2:
+        if (boy.velocity == 2 or boy.velocity == -2):
             boy.velocity /= 2
         if event == RIGHT_DOWN:
-            boy.velocity = 1
-            boy.dir = boy.velocity
+            boy.velocity += 1
         elif event == LEFT_DOWN:
-            boy.velocity = -1
-            boy.dir = boy.velocity
+            boy.velocity -= 1
         elif event == RIGHT_UP:
             boy.velocity -= 1
         elif event == LEFT_UP:
             boy.velocity += 1
-        
+        boy.dir = boy.velocity
     def exit(boy, event):
         pass
     def do(boy):
@@ -58,7 +66,6 @@ class RunState:
         boy.timer -= 1
         boy.x += boy.velocity
         boy.x = clamp(25, boy.x, 800 - 25)
-        
     def draw(boy):
         if boy.velocity == 1:
             boy.image.clip_draw(boy.frame * 100, 100, 100, 100, boy.x, boy.y)
@@ -82,9 +89,22 @@ class SleepState:
 class DashState:
     def enter(boy, event):
         boy.stamina = 100
+
         if(boy.velocity==1 or boy.velocity==-1):
             boy.velocity *= 2
-        
+
+        if event == RIGHT_DOWN:
+            boy.velocity += 2
+        elif event == LEFT_DOWN:
+            boy.velocity -= 2
+        elif event == RIGHT_UP:
+            boy.velocity -= 2
+        elif event == LEFT_UP:
+            boy.velocity += 2
+        if boy.velocity > 0:
+            boy.dir = 1
+        elif boy.velocity < 0:
+            boy.dir = -1
     def exit(boy, event):
         pass
     def do(boy):
@@ -94,6 +114,7 @@ class DashState:
         boy.x = clamp(25, boy.x, 800 - 25)
         boy.stamina -= 1
         if boy.stamina == 0:
+            pass
             boy.add_event(DASH_DONE)
     def draw(boy):
         if boy.dir == 1:
@@ -104,19 +125,18 @@ class DashState:
 # fill here
 
 next_state_table = {
-    IdleState: {RIGHT_UP: IdleState, LEFT_UP: IdleState,
-    RIGHT_DOWN: RunState, LEFT_DOWN: RunState,
-    SLEEP_TIMER: SleepState, DASH: IdleState, DASH_DONE: IdleState},
+    IdleState: {RIGHT_UP: RunState, LEFT_UP: RunState,
+    RIGHT_DOWN: RunState, LEFT_DOWN: RunState, DASH: IdleState, DASH_DONE: IdleState},
 
     RunState: {RIGHT_UP: IdleState, LEFT_UP: IdleState,
-    LEFT_DOWN: RunState, RIGHT_DOWN: RunState, DASH: DashState, DASH_DONE: RunState},
+    LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState, DASH: DashState, DASH_DONE: RunState},
 
     SleepState: {RIGHT_UP: RunState, LEFT_UP: RunState,
     LEFT_DOWN: RunState, RIGHT_DOWN: RunState, DASH: SleepState, DASH_DONE: SleepState},
 
     DashState: {
         RIGHT_UP: IdleState, LEFT_UP: IdleState,
-    LEFT_DOWN: DashState, RIGHT_DOWN: DashState, DASH: DashState, DASH_DONE: RunState
+    LEFT_DOWN: IdleState, RIGHT_DOWN: IdleState, DASH: DashState, DASH_DONE: RunState
     }
 }
 
@@ -160,7 +180,7 @@ class Boy:
 
     def draw(self):
         self.cur_state.draw(self)
-        debug_print('Velocity :' + str(self.velocity) + ' Dir:' + str(self.dir))
+        debug_print('Velocity :' + str(self.velocity) + ' Dir:' + str(self.dir) + 'State:' + str(self.cur_state))
         pass
 
 
